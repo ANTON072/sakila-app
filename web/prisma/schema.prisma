@@ -18,22 +18,22 @@ model actor {
 }
 
 model address {
-  address_id  Int                     @id @default(autoincrement()) @db.UnsignedSmallInt
-  address     String                  @db.VarChar(50)
-  address2    String?                 @db.VarChar(50)
-  district    String                  @db.VarChar(20)
-  city_id     Int                     @db.UnsignedSmallInt
-  postal_code String?                 @db.VarChar(10)
-  phone       String                  @db.VarChar(20)
-  location    Unsupported("geometry")
-  last_update DateTime                @default(now()) @db.Timestamp(0)
-  city        city                    @relation(fields: [city_id], references: [city_id], map: "fk_address_city")
+  address_id  Int        @id @default(autoincrement()) @db.UnsignedSmallInt
+  address     String     @db.VarChar(50)
+  address2    String?    @db.VarChar(50)
+  district    String     @db.VarChar(20)
+  city_id     Int        @db.UnsignedSmallInt
+  postal_code String?    @db.VarChar(10)
+  phone       String     @db.VarChar(20)
+  // geometryタイプはJSON型として扱う
+  location    Json?      @db.Json
+  last_update DateTime   @default(now()) @db.Timestamp(0)
+  city        city      @relation(fields: [city_id], references: [city_id], map: "fk_address_city")
   customer    customer[]
   staff       staff[]
   store       store[]
 
   @@index([city_id], map: "idx_fk_city_id")
-  @@index([location(length: 32)], map: "idx_location")
 }
 
 model category {
@@ -93,7 +93,8 @@ model film {
   length                                       Int?            @db.UnsignedSmallInt
   replacement_cost                             Decimal         @default(19.99) @db.Decimal(5, 2)
   rating                                       film_rating?    @default(G)
-  special_features                             String?
+  // SET型はカンマ区切りの文字列として扱う
+  special_features                             String?         @db.VarChar(255)
   last_update                                  DateTime        @default(now()) @db.Timestamp(0)
   language_film_language_idTolanguage          language        @relation("film_language_idTolanguage", fields: [language_id], references: [language_id], map: "fk_film_language")
   language_film_original_language_idTolanguage language?       @relation("film_original_language_idTolanguage", fields: [original_language_id], references: [language_id], onDelete: Restrict, map: "fk_film_language_original")
@@ -133,7 +134,7 @@ model film_text {
   title       String  @db.VarChar(255)
   description String? @db.Text
 
-  @@index([title, description], map: "idx_title_description")
+  @@index([title, description(length: 768)], map: "idx_title_description")
 }
 
 model inventory {
@@ -161,7 +162,7 @@ model payment {
   payment_id   Int       @id @default(autoincrement()) @db.UnsignedSmallInt
   customer_id  Int       @db.UnsignedSmallInt
   staff_id     Int       @db.UnsignedTinyInt
-  rental_id    Int?
+  rental_id    Int?      @db.UnsignedInt
   amount       Decimal   @db.Decimal(5, 2)
   payment_date DateTime  @db.DateTime(0)
   last_update  DateTime? @default(now()) @db.Timestamp(0)
@@ -175,7 +176,7 @@ model payment {
 }
 
 model rental {
-  rental_id    Int       @id @default(autoincrement())
+  rental_id    Int       @id @default(autoincrement()) @db.UnsignedInt
   rental_date  DateTime  @db.DateTime(0)
   inventory_id Int       @db.UnsignedMediumInt
   customer_id  Int       @db.UnsignedSmallInt
@@ -198,7 +199,7 @@ model staff {
   first_name                          String    @db.VarChar(45)
   last_name                           String    @db.VarChar(45)
   address_id                          Int       @db.UnsignedSmallInt
-  picture                             Bytes?    @db.Blob
+  picture                             Bytes?    @db.LongBlob
   email                               String?   @db.VarChar(50)
   store_id                            Int       @db.UnsignedTinyInt
   active                              Boolean   @default(true)
