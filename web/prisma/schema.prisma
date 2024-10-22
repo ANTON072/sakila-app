@@ -134,7 +134,7 @@ model film_text {
   title       String  @db.VarChar(255)
   description String? @db.Text
 
-  @@index([title, description(length: 768)], map: "idx_title_description")
+  @@index([title(length: 255)], map: "idx_title_description")
 }
 
 model inventory {
