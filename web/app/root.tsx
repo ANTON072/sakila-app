@@ -34,8 +34,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <GlobalHeader />
-        {children}
+        <div className="grid grid-rows-[auto_1fr]">
+          <GlobalHeader />
+          {children}
+        </div>
         <ScrollRestoration />
         <Scripts />
       </body>
